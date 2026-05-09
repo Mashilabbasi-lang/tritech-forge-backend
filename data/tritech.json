@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "id": "dn546mgnr26o",
+      "username": "superadmin",
+      "passwordHash": "$2a$10$mDdOVzhNYl5pOjLc2K23reBTsx63DU0ln/m7GqV6YorORhozBfsTe",
+      "role": "superadmin",
+      "companyId": null,
+      "createdAt": "2026-05-09T06:59:44.888Z"
+    }
+  ],
+  "companies": [],
+  "bookings": [],
+  "activity": []
+}
