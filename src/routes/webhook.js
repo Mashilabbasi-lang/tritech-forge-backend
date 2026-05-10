@@ -1,42 +1,32 @@
 import { Router } from "express";
-import { getDb } from "../db.js";
+import { getPool } from "../db.js";
 import { bookingId } from "../utils.js";
 
 const router = Router();
 
-// POST /webhook/:companyId/booking
 router.post("/:companyId/booking", async (req, res) => {
   const { companyId } = req.params;
   const apiKey = req.headers["x-api-key"] || req.query.key;
+  const pool = getPool();
 
-  const db = getDb();
-  const company = db.data.companies.find(c => c.id === companyId && c.active);
+  const { rows } = await pool.query("SELECT * FROM companies WHERE id = $1 AND active = TRUE", [companyId]);
+  const company = rows[0];
   if (!company) return res.status(404).json({ success: false, error: "Company not found or inactive" });
-  if (company.apiKey !== apiKey) return res.status(401).json({ success: false, error: "Invalid API key" });
+  if (company.api_key !== apiKey) return res.status(401).json({ success: false, error: "Invalid API key" });
 
   const { customerName, phone, issueType, date, time, city, isEmergency = false, notes } = req.body;
   if (!customerName?.trim()) return res.status(400).json({ success: false, error: "customerName is required" });
 
   const id = bookingId();
-  const now = new Date().toISOString();
+  await pool.query(
+    "INSERT INTO bookings (id, company_id, customer_name, phone, issue_type, date, time, city, status, source, is_emergency, notes) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Pending','AI Booked',$9,$10)",
+    [id, companyId, customerName.trim(), phone || "", issueType || "", date || "", time || "", city || "", !!isEmergency, notes || ""]
+  );
+  await pool.query(
+    "INSERT INTO activity_log (company_id, booking_id, action, customer_name) VALUES ($1,$2,'AI booking received',$3)",
+    [companyId, id, customerName.trim()]
+  );
 
-  db.data.bookings.push({
-    id, companyId,
-    customerName: customerName.trim(),
-    phone: phone || "", issueType: issueType || "",
-    date: date || "", time: time || "", city: city || "",
-    status: "Pending", source: "AI Booked",
-    isEmergency: !!isEmergency, notes: notes || "",
-    createdAt: now, updatedAt: now,
-  });
-
-  db.data.activity.push({
-    id: Date.now(), companyId, bookingId: id,
-    action: "AI booking received", customerName: customerName.trim(),
-    createdAt: now,
-  });
-
-  await db.write();
   console.log(`📥 Webhook booking: ${id} for ${company.name}`);
   res.status(201).json({ success: true, bookingId: id, message: "Booking created successfully" });
 });
