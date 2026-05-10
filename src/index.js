@@ -10,6 +10,7 @@ import companyRoutes from "./routes/companies.js";
 import bookingRoutes from "./routes/bookings.js";
 import statsRoutes from "./routes/stats.js";
 import webhookRoutes from "./routes/webhook.js";
+import blogRoutes from "./routes/blog.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +30,7 @@ app.use("/api/companies", companyRoutes);
 app.use("/api/companies", bookingRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/webhook", webhookRoutes);
+app.use("/api/blog", blogRoutes);
 
 // ─── Health ───────────────────────────────────────────────
 app.get("/health", (req, res) => {

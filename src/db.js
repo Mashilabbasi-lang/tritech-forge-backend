@@ -29,6 +29,7 @@ export async function initDb() {
   db.data.companies ??= [];
   db.data.bookings ??= [];
   db.data.activity ??= [];
+  db.data.blogPosts ??= [];
 
   // Seed superadmin
   const adminUsername = process.env.ADMIN_USERNAME || "superadmin";
