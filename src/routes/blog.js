@@ -5,7 +5,7 @@ import { nanoid } from "../utils.js";
 const router = Router();
 
 // ─── Simple blog admin auth middleware ───────────────────
-const BLOG_PASSWORD = process.env.BLOG_PASSWORD || "TriTechBlog2025";
+const BLOG_PASSWORD = process.env.BLOG_PASSWORD || "TriTech1122@$%";
 
 function requireBlogAuth(req, res, next) {
   const key = req.headers["x-blog-password"] || req.query.blogPassword;
