@@ -12,9 +12,12 @@ export function getPool() {
 }
 
 export async function initDb() {
+  const isRailway = process.env.DATABASE_URL?.includes("railway.internal") || 
+                    process.env.DATABASE_URL?.includes("rlwy.net");
+  
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: isRailway ? false : { rejectUnauthorized: false },
   });
 
   await pool.query("SELECT 1");
