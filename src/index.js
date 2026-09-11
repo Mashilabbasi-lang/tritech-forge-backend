@@ -48,9 +48,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: "Internal server error" });
 });
 
-// ─── Start ────────────────────────────────────────────────
-await initDb();
-app.listen(PORT, () => {
-  console.log(`✅ TriTech Forge API running on port ${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+// ─── Start (local dev) / Export (Vercel serverless) ───────
+let dbInitialized = false;
+
+async function ensureDb() {
+  if (!dbInitialized) {
+    await initDb();
+    dbInitialized = true;
+  }
+}
+
+// Vercel serverless: wrap app to init DB on first request
+const handler = async (req, res) => {
+  await ensureDb();
+  return app(req, res);
+};
+
+// Local dev: start server normally
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  ensureDb().then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ TriTech Forge API running on port ${PORT}`);
+      console.log(`   Health: http://localhost:${PORT}/health`);
+    });
+  });
+}
+
+export default handler;
