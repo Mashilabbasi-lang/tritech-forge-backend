@@ -11,6 +11,7 @@ import bookingRoutes from "./routes/bookings.js";
 import statsRoutes from "./routes/stats.js";
 import webhookRoutes from "./routes/webhook.js";
 import blogRoutes from "./routes/blog.js";
+import chatRoutes from "./routes/chat.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +32,7 @@ app.use("/api/companies", bookingRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/api/blog", blogRoutes);
+app.use("/api/chat", chatRoutes);
 
 // ─── Health ───────────────────────────────────────────────
 app.get("/health", (req, res) => {
