@@ -7,7 +7,7 @@ const router = express.Router();
 const chatLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-const GROQ_MODEL = "llama-3.1-8b-instant";
+const GROQ_MODEL = "llama3-8b-8192";
 
 const SYSTEM_PROMPT = `You are a smart sales assistant for TriTech Forge, an AI voice automation platform for home services and trade businesses.
 
