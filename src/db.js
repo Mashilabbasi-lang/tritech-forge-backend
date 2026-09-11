@@ -11,17 +11,27 @@ export function getPool() {
   return pool;
 }
 
-export async function initDb() {
+// Lightweight connect — just verifies the connection
+export async function connectDb() {
+  if (pool) return; // already connected
   const isRailway = process.env.DATABASE_URL?.includes("railway.internal") || 
                     process.env.DATABASE_URL?.includes("rlwy.net");
   
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: isRailway ? false : { rejectUnauthorized: false },
+    max: 3, // limit connections for serverless
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
   });
 
   await pool.query("SELECT 1");
   console.log("✅ PostgreSQL connected");
+}
+
+// Full init — creates tables and admin user (run once on deploy)
+export async function initDb() {
+  await connectDb();
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (

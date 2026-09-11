@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 
-import { initDb } from "./db.js";
+import { connectDb, initDb } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import companyRoutes from "./routes/companies.js";
 import bookingRoutes from "./routes/bookings.js";
@@ -48,25 +48,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: "Internal server error" });
 });
 
-// ─── Start (local dev) / Export (Vercel serverless) ───────
-let dbInitialized = false;
-
-async function ensureDb() {
-  if (!dbInitialized) {
-    await initDb();
-    dbInitialized = true;
-  }
-}
-
-// Vercel serverless: wrap app to init DB on first request
+// ─── Serverless handler (Vercel) ─────────────────────────
+// Uses lightweight connectDb (no table creation) for fast cold starts
+let connected = false;
 const handler = async (req, res) => {
-  await ensureDb();
+  if (!connected) {
+    await connectDb();
+    connected = true;
+  }
   return app(req, res);
 };
 
-// Local dev: start server normally
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  ensureDb().then(() => {
+// ─── Local dev: start server normally ────────────────────
+if (!process.env.VERCEL) {
+  initDb().then(() => {
     app.listen(PORT, () => {
       console.log(`✅ TriTech Forge API running on port ${PORT}`);
       console.log(`   Health: http://localhost:${PORT}/health`);
