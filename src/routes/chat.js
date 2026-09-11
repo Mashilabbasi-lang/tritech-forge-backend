@@ -61,6 +61,7 @@ router.post("/", chatLimiter, async (req, res) => {
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
         temperature: 0.5,
         max_tokens: 300,
+        tool_choice: "none",
       }),
     });
 
